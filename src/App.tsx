@@ -3,7 +3,8 @@ import { Container } from "react-bootstrap";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { NewTask } from "./NewTask";
 // import { useMemo } from "react";
-// import { v4 as uuidV4 } from "uuid";
+import { v4 as uuidV4 } from "uuid";
+import { useLocalStorage } from "./useLocalStorage";
 
 export type TaskData = {
   name: string;
@@ -12,13 +13,33 @@ export type TaskData = {
   // time: string;
 };
 
+export type RawTask = {
+  id: string
+} & RawTaskData
+
+export type RawTaskData = {
+  name: string
+  description: string
+  date: Date
+  // time: string 
+}
+
 function App() {
+  const [tasks, setTasks] = useLocalStorage<RawTask[]>('tasks', [])
+
+  function onCreateTask({...data}: TaskData) {
+    setTasks(prevTasks => {
+      return [...prevTasks,
+      { ...data, id: uuidV4(), }
+      ]
+    })
+  }
 
   return (
     <Container className='my-4'>
       <Routes>
         <Route path='/' element={<h1>Home</h1>} />
-        <Route path='/new' element={<NewTask />} />
+        <Route path='/new' element={<NewTask onSubmit={onCreateTask} />} />
         <Route path='/id' element={<h1>Task</h1>} />
         <Route path='*' element={<Navigate to='/' />} />
       </Routes>

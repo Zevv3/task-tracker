@@ -1,0 +1,28 @@
+.day {
+    width: 44px;
+    height: 32px;
+    border: 1px solid black;
+    margin-bottom: 10px;
+    outline-width: thin;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+.weekday {
+    width: 44px;
+    height: 32px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+

@@ -10,7 +10,9 @@ export type TaskData = {
   name: string;
   description: string;
   date: Date;
-  // time: string;
+  startTime: string;
+  endTime: string;
+  repeatOptions: string;
 };
 
 export type RawTask = {
@@ -21,7 +23,9 @@ export type RawTaskData = {
   name: string
   description: string
   date: Date
-  // time: string 
+  startTime: string;
+  endTime: string;
+  repeatOptions: string;
 }
 
 function App() {

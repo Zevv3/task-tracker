@@ -26,3 +26,18 @@
     margin-bottom: 10px;
 }
 
+.time-button {
+    height: 44px;
+    align-items: right;
+}
+
+.date-group {
+    margin-bottom: 10px;
+}
+
+.date-and-time {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+

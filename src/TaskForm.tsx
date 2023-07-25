@@ -1,7 +1,7 @@
-import { FormEvent, useRef, useState } from "react"
+import { FormEvent, useEffect, useRef, useState } from "react"
 import { format, addMonths, subMonths, startOfMonth, 
     endOfMonth, isSameMonth, isSameDay, startOfWeek, endOfWeek, addDays } from 'date-fns';
-import { Button, Col, Form, Modal, Row, Stack } from "react-bootstrap"
+import { Button, Col, Form, Modal, Row, Stack, ToggleButton, ToggleButtonGroup } from "react-bootstrap"
 import Select from 'react-select'
 import { TaskData } from "./App"
 import './styles.css'
@@ -19,86 +19,18 @@ type CalendarProps = {
 
 type TimeOption = {
     value: number
-    label: number
+    label: string
 }
 
-const hours: TimeOption[] = [
-    { value: 1, label: 1 },
-    { value: 2, label: 2 },
-    { value: 3, label: 3 },
-    { value: 4, label: 4 },
-    { value: 5, label: 5 },
-    { value: 6, label: 6 },
-    { value: 7, label: 7 },
-    { value: 8, label: 8 },
-    { value: 9, label: 9 },
-    { value: 10, label: 10 },
-    { value: 11, label: 11 },
-    { value: 12, label: 12 },
-]
+const hours: TimeOption[] = [];
+for (let i = 1; i <= 12; i++) {
+  hours.push({ value: i, label: i.toString() });
+}
 
-const minutes: TimeOption[] = [
-    { value: 0, label: 0 },
-    { value: 1, label: 1 },
-    { value: 2, label: 2 },
-    { value: 3, label: 3 },
-    { value: 4, label: 4 },
-    { value: 5, label: 5 },
-    { value: 6, label: 6 },
-    { value: 7, label: 7 },
-    { value: 8, label: 8 },
-    { value: 9, label: 9 },
-    { value: 10, label: 10 },
-    { value: 11, label: 11 },
-    { value: 12, label: 12 },
-    { value: 13, label: 13 },
-    { value: 14, label: 14 },
-    { value: 15, label: 15 },
-    { value: 16, label: 16 },
-    { value: 17, label: 17 },
-    { value: 18, label: 18 },
-    { value: 19, label: 19 },
-    { value: 20, label: 20 },
-    { value: 21, label: 21 },
-    { value: 22, label: 22 },
-    { value: 23, label: 23 },
-    { value: 24, label: 24 },
-    { value: 25, label: 25 },
-    { value: 26, label: 26 },
-    { value: 27, label: 27 },
-    { value: 28, label: 28 },
-    { value: 29, label: 29 },
-    { value: 30, label: 30 },
-    { value: 31, label: 31 },
-    { value: 32, label: 32 },
-    { value: 33, label: 33 },
-    { value: 34, label: 34 },
-    { value: 35, label: 35 },
-    { value: 36, label: 36 },
-    { value: 37, label: 37 },
-    { value: 38, label: 38 },
-    { value: 39, label: 39 },
-    { value: 40, label: 40 },
-    { value: 41, label: 41 },
-    { value: 42, label: 42 },
-    { value: 43, label: 43 },
-    { value: 44, label: 44 },
-    { value: 45, label: 45 },
-    { value: 46, label: 46 },
-    { value: 47, label: 47 },
-    { value: 48, label: 48 },
-    { value: 49, label: 49 },
-    { value: 50, label: 50 },
-    { value: 51, label: 51 },
-    { value: 52, label: 52 },
-    { value: 53, label: 53 },
-    { value: 54, label: 54 },
-    { value: 55, label: 55 },
-    { value: 56, label: 56 },
-    { value: 57, label: 57 },
-    { value: 58, label: 58 },
-    { value: 59, label: 59 },
-]
+const minutes: TimeOption[] = [];
+for (let i = 0; i < 60; i++) {
+  minutes.push({ value: i, label: i.toString() });
+}
 
 export function TaskForm({ onSubmit }: TaskFormProps) {
     const nameRef = useRef<HTMLInputElement>(null)
@@ -107,9 +39,12 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date())
     const [currentMonth, setCurrentMonth] = useState(new Date())
     const [selectedStartHour, setSelectedStartHour] = useState<TimeOption | null>(null)
-    const [selectedStartMinute, setSelectedStartMinute] = useState(null)
-    const [selectedEndHour, setSelectedEndHour] = useState(null)
-    const [selectedEndMinute, setSelectedEndMinute] = useState(null)
+    const [selectedStartMinute, setSelectedStartMinute] = useState<TimeOption | null>(null)
+    const [selectedEndHour, setSelectedEndHour] = useState<TimeOption | null>(null)
+    const [selectedEndMinute, setSelectedEndMinute] = useState<TimeOption | null>(null)
+    const [repeatOptions, setRepeatOptions] = useState<string[]>(['No Repeat'])
+    const [startTimeOptions, setStartTimeOptions] = useState<string[]>(['AM'])
+    const [endTimeOptions, setEndTimeOptions] = useState<string[]>(['AM'])
 
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -125,6 +60,52 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
         setSelectedStartHour(selectedStartHour)
     }
 
+    const handleStartMinuteChange = (selectedStartMinute: TimeOption | null) => {
+        setSelectedStartMinute(selectedStartMinute)
+    }
+
+    const handleEndHourChange = (selectedEndHour: TimeOption | null) => {
+        setSelectedEndHour(selectedEndHour)
+    }
+
+    const handleEndMinuteChange = (selectedEndMinute: TimeOption | null) => {
+        setSelectedEndMinute(selectedEndMinute)
+    }
+
+    const handleOptionChange = (val: string[]) => {
+        setRepeatOptions(val)
+    }
+
+    const handleStartTimeOptionChange = (val: string[]) => setStartTimeOptions(val)
+
+    const handleEndTimeOptionChange = (val: string[]) => setEndTimeOptions(val)
+
+    // setting initial state for time selection
+    useEffect(() => {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const isPM = currentHour > 12;
+    
+        const defaultStartHour = hours.find((option) => option.value === (isPM ? currentHour - 12 : currentHour));
+        const defaultStartMinute = minutes.find((option) => option.value === currentMinute);
+    
+        // Set the initial state for start time options
+        setSelectedStartHour(defaultStartHour || null);
+        setSelectedStartMinute(defaultStartMinute || null);
+    
+        const oneHourAfter = new Date(now.getTime() + 60 * 60 * 1000);
+        const endHour = oneHourAfter.getHours();
+        const endMinute = oneHourAfter.getMinutes();
+        const isEndPM = endHour > 12;
+    
+        const defaultEndHour = hours.find((option) => option.value === (isEndPM ? endHour - 12 : endHour));
+        const defaultEndMinute = minutes.find((option) => option.value === endMinute);
+    
+        setSelectedEndHour(defaultEndHour || null);
+        setSelectedEndMinute(defaultEndMinute || null);
+      }, []);
+
     function handleSubmit(e: FormEvent) {
         e.preventDefault()
 
@@ -132,7 +113,9 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
             name: nameRef.current!.value,
             description: descriptionRef.current!.value,
             date: selectedDate || new Date(),
-            // time
+            startTime: `${selectedStartHour}:${selectedStartMinute} ${startTimeOptions}`,
+            endTime: `${selectedEndHour}:${selectedEndMinute} ${endTimeOptions}`,
+            repeatOptions: `${repeatOptions}`,
         })
     }
 
@@ -191,38 +174,144 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
                 <Form.Group controlId='description'>
                     <Form.Label>Description</Form.Label>
                     <Form.Control required as='textarea' 
-                    ref={descriptionRef} rows={10} />
+                    ref={descriptionRef} rows={5} />
                 </Form.Group>
                 </Row>
-                <Row>
-                <Col>
-                    <Form.Group controlId='date'>
-                        <Button variant='secondary' onClick={() => setShowDateModal(true)}>
-                        <Form.Label>Date</Form.Label>
-                            {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select Date'}
-                        </Button>
+                <div className='date-and-time'>
+                    <Col>
+                        <Row>
+                            <Form.Group controlId='date' className='date-group'>
+                                <Form.Label>Date</Form.Label> <br />
+                                <Button variant='secondary' onClick={() => setShowDateModal(true)}>
+                                    {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select Date'}
+                                </Button>
+                            </Form.Group>
+                        </Row>
+                        <Row>
+                            <ToggleButtonGroup 
+                            type='radio'
+                            name='repeat-options'
+                            value={repeatOptions} 
+                            onChange={handleOptionChange} >
+                                <Stack gap={2}>
+                                    <ToggleButton 
+                                    className="repeat-options"
+                                    variant='outline-primary'
+                                    id='No Repeat' 
+                                    value={['No Repeat']}>
+                                        No Repeat
+                                    </ToggleButton>
+                                    <ToggleButton 
+                                    className="repeat-options"
+                                    variant='outline-primary' 
+                                    id='Every Dayt' 
+                                    value={['Every Day']}>
+                                        Every Day
+                                    </ToggleButton>
+                                    <ToggleButton 
+                                    className="repeat-options"
+                                    variant='outline-primary' 
+                                    id='Every Week' 
+                                    value={['Every Week']}>
+                                        Every Week
+                                    </ToggleButton>
+                                </Stack>
+                                <Stack gap={2}>
+                                    <ToggleButton 
+                                    className="repeat-options"
+                                    variant='outline-primary' 
+                                    id='Every Month' 
+                                    value={['Every Month']}>
+                                        Every Month 
+                                    </ToggleButton>
+                                    <ToggleButton 
+                                    className="repeat-options"
+                                    variant='outline-primary' 
+                                    id='Eevry Year' 
+                                    value={['Every Year']}>
+                                        Every Year
+                                    </ToggleButton>
+                                </Stack>
+                            </ToggleButtonGroup>
+                        </Row>
+                    </Col>
+                    <Form.Group controlId='time'>
+                    <Row>
+                    <Form.Label>Start Time</Form.Label>
+                    <Col>
+                        <Stack gap={2} className="time-stack">
+                            <Select options={hours}
+                            value={selectedStartHour}
+                            onChange={handleStartHourChange}
+                            isSearchable={true}
+                            placeholder="HH"
+                            className="time-input"
+                            / >
+                            <Select options={minutes}
+                            value={selectedStartMinute}
+                            onChange={handleStartMinuteChange}
+                            isSearchable={true}
+                            placeholder="MM"
+                            className="time-input"
+                            / >
+                        </Stack>
+                    </Col>
+                    <Col>
+                        <ToggleButtonGroup 
+                        vertical={true} 
+                        type="radio" 
+                        name="start-am-pm" 
+                        defaultValue={'AM'}
+                        value={startTimeOptions}
+                        onChange={handleStartTimeOptionChange}>
+                            <ToggleButton id="start-am" value={'AM'} className='time-button'>
+                            AM
+                            </ToggleButton>
+                            <ToggleButton id="start-pm" value={'PM'} className='time-button'>
+                            PM
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+                    </Col>
+                    </Row>
+                    <Row>
+                    <Form.Label>End Time</Form.Label>
+                    <Col>
+                        <Stack gap={2} className="time-stack">
+                            <Select options={hours}
+                            value={selectedEndHour}
+                            onChange={handleEndHourChange}
+                            isSearchable={true}
+                            placeholder="HH"
+                            className="time-input"
+                            / >
+                            <Select options={minutes}
+                            value={selectedEndMinute}
+                            onChange={handleEndMinuteChange}
+                            isSearchable={true}
+                            placeholder="MM"
+                            className="time-input"
+                            / >
+                        </Stack>
+                    </Col>
+                    <Col>
+                        <ToggleButtonGroup 
+                        vertical={true} 
+                        type="radio" 
+                        name="end-am-pm" 
+                        defaultValue={'AM'}
+                        value={endTimeOptions}
+                        onChange={handleEndTimeOptionChange}>
+                            <ToggleButton id="end-am" value={'AM'} className='time-button'>
+                            AM
+                            </ToggleButton>
+                            <ToggleButton id="end-pm" value={'PM'} className='time-button'>
+                            PM
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+                    </Col>
+                    </Row>
                     </Form.Group>
-                </Col>    
-                <Col>
-                    <Form.Group controlId='start-time'>
-                        <Select options={hours}
-                        value={selectedStartHour}
-                        onChange={handleStartHourChange}
-                        isSearchable={true}
-                        placeholder="HH"
-                        / >
-                        <Select options={minutes}
-                        value={selectedStartMinute}
-                        onChange={handleStartMinuteChange}
-                        isSearchable={true}
-                        placeholder="MM"
-                        / >
-                    </Form.Group>
-                </Col>
-                <Col>
-                    
-                </Col>
-                </Row>
+                </div>
             </Stack>
 
         <Modal show={showDateModal} onHide={() => setShowDateModal(false)}>

@@ -5,16 +5,10 @@ import { Button, Col, Form, Modal, Row, Stack, ToggleButton, ToggleButtonGroup }
 import Select from 'react-select'
 import { TaskData } from "./App"
 import './styles.css'
+import { Link } from "react-router-dom";
 
 type TaskFormProps = {
     onSubmit: (data: TaskData) => void
-} & CalendarProps
-
-type CalendarProps = {
-    selectedDate: Date
-    handleDateSelection: (date: Date) => void
-    closeModal: () => void
-    showModal: boolean
 }
 
 type TimeOption = {
@@ -110,7 +104,7 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
         e.preventDefault()
 
         onSubmit({
-            name: nameRef.current!.value,
+            title: nameRef.current!.value,
             description: descriptionRef.current!.value,
             date: selectedDate || new Date(),
             startTime: `${selectedStartHour}:${selectedStartMinute} ${startTimeOptions}`,
@@ -165,7 +159,7 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
         <Form onSubmit={handleSubmit}>
             <Stack gap={4}>
                 <Row>
-                <Form.Group controlId='name'>
+                <Form.Group controlId='title'>
                     <Form.Label>Task Name</Form.Label>
                     <Form.Control ref={nameRef} required />
                 </Form.Group>
@@ -313,6 +307,15 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
                     </Form.Group>
                 </div>
             </Stack>
+            <br />
+            <Row>
+                <Stack direction="horizontal" gap={2} className='justify-content-end'>
+                        <Button type='submit' variant='primary'>Save</Button>
+                    <Link to='..'>
+                        <Button type='button' variant='outline-secondary'>Cancel</Button>
+                    </Link>
+                </Stack>
+            </Row>
 
         <Modal show={showDateModal} onHide={() => setShowDateModal(false)}>
           <Modal.Header closeButton>

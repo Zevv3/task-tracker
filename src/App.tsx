@@ -5,9 +5,14 @@ import { NewTask } from "./NewTask";
 // import { useMemo } from "react";
 import { v4 as uuidV4 } from "uuid";
 import { useLocalStorage } from "./useLocalStorage";
+import { TaskList } from "./TaskList";
+
+export type Task = {
+  id: string
+} & TaskData
 
 export type TaskData = {
-  name: string;
+  title: string;
   description: string;
   date: Date;
   startTime: string;
@@ -20,7 +25,7 @@ export type RawTask = {
 } & RawTaskData
 
 export type RawTaskData = {
-  name: string
+  title: string
   description: string
   date: Date
   startTime: string;
@@ -34,7 +39,7 @@ function App() {
   function onCreateTask({...data}: TaskData) {
     setTasks(prevTasks => {
       return [...prevTasks,
-      { ...data, id: uuidV4(), }
+      { ...data, id: uuidV4() }
       ]
     })
   }
@@ -42,7 +47,8 @@ function App() {
   return (
     <Container className='my-4'>
       <Routes>
-        <Route path='/' element={<h1>Home</h1>} />
+        <Route path='/' element={ <TaskList 
+        tasks={tasks} />} />
         <Route path='/new' element={<NewTask onSubmit={onCreateTask} />} />
         <Route path='/id' element={<h1>Task</h1>} />
         <Route path='*' element={<Navigate to='/' />} />

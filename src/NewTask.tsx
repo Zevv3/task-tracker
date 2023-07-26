@@ -10,7 +10,7 @@ export function NewTask({ onSubmit }: NewTaskProps) {
     <>
         <h1 className='mb-4'>New Task</h1>
         <TaskForm 
-        onSubmit={ onSubmit }/>
+        onSubmit={ onSubmit } />
     </>
     )
 }

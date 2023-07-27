@@ -5,11 +5,11 @@ import { Button, Col, Form, Modal, Row, Stack, ToggleButton, ToggleButtonGroup }
 import Select from 'react-select'
 import { TaskData } from "./App"
 import './styles.css'
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 type TaskFormProps = {
     onSubmit: (data: TaskData) => void
-}
+} & Partial<TaskData>
 
 type TimeOption = {
     value: number
@@ -23,8 +23,13 @@ for (let i = 1; i <= 12; i++) {
 
 const minutes: TimeOption[] = [];
 for (let i = 0; i < 60; i++) {
-  minutes.push({ value: i, label: i.toString() });
+  let label = i.toString();
+  if (i < 10) {
+    label = `0${i.toString()}`;
+  }
+  minutes.push({ value: i, label });
 }
+
 
 export function TaskForm({ onSubmit }: TaskFormProps) {
     const nameRef = useRef<HTMLInputElement>(null)
@@ -39,6 +44,22 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
     const [repeatOptions, setRepeatOptions] = useState<string[]>(['No Repeat'])
     const [startTimeOptions, setStartTimeOptions] = useState<string[]>(['AM'])
     const [endTimeOptions, setEndTimeOptions] = useState<string[]>(['AM'])
+    const navigate = useNavigate()
+
+    const months = {
+        0: 'January',
+        1: 'February',
+        2: 'March',
+        3: 'April',
+        4: 'May',
+        5: 'June',
+        6: 'July',
+        7: 'August',
+        8: 'September',
+        9: 'October',
+        10: 'November',
+        11: 'December',
+    }
 
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -74,7 +95,7 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
 
     const handleEndTimeOptionChange = (val: string[]) => setEndTimeOptions(val)
 
-    // setting initial state for time selection
+    // setting default time for time selection
     useEffect(() => {
         const now = new Date();
         const currentHour = now.getHours();
@@ -84,7 +105,6 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
         const defaultStartHour = hours.find((option) => option.value === (isPM ? currentHour - 12 : currentHour));
         const defaultStartMinute = minutes.find((option) => option.value === currentMinute);
     
-        // Set the initial state for start time options
         setSelectedStartHour(defaultStartHour || null);
         setSelectedStartMinute(defaultStartMinute || null);
     
@@ -106,11 +126,12 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
         onSubmit({
             title: nameRef.current!.value,
             description: descriptionRef.current!.value,
-            date: selectedDate || new Date(),
-            startTime: `${selectedStartHour}:${selectedStartMinute} ${startTimeOptions}`,
-            endTime: `${selectedEndHour}:${selectedEndMinute} ${endTimeOptions}`,
+            date: `${months[selectedDate.getMonth() as keyof typeof months]} ${selectedDate.getDate()}`,
+            startTime: `Start: ${selectedStartHour?.label}:${selectedStartMinute?.label} ${startTimeOptions}`,
+            endTime: `End: ${selectedEndHour?.label}:${selectedEndMinute?.label} ${endTimeOptions}`,
             repeatOptions: `${repeatOptions}`,
         })
+        navigate('..')
     }
 
     function handleDateConfirm() {

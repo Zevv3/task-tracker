@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Col, Form, Modal, Row, Stack } from "react-bootstrap";
+import { Button, Card, Col, Row, Stack } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import styles from './TaskList.module.css';
@@ -11,7 +11,7 @@ type SimplifiedTask = {
     title: string
     id: string
     description: string
-    date: Date
+    date: string
     startTime: string
     endTime: string
 }
@@ -24,6 +24,14 @@ export function TaskList({ tasks }: TaskListProps) {
             return (title === '' || task.title.toLowerCase().includes(title.toLowerCase()))
         })
     }, [title, tasks])
+
+    const sortedTasks = useMemo(() => {
+        return [...filteredTasks].sort((a, b) => {
+          const aDateTime = `${a.date} ${a.startTime}`;
+          const bDateTime = `${b.date} ${b.startTime}`;
+          return aDateTime.localeCompare(bDateTime);
+        });
+      }, [filteredTasks]);
 
     return (
         <>
@@ -38,7 +46,7 @@ export function TaskList({ tasks }: TaskListProps) {
             </Col>
         </Row>
         <Row xs={1} sm={2} lg={3} xl={4} className='g-3'>
-            {filteredTasks.map(task => (
+            {sortedTasks.map(task => (
                 <Col key={task.id}>
                     <TaskCard 
                     id={task.id} 
@@ -60,9 +68,9 @@ function TaskCard({ id, title, description, date, startTime, endTime }: Simplifi
         className={`h-100 text-reset text-decoration-none ${styles.card}`}>
             <Card.Body>
                 <Stack gap={2} className="align-items-center justify-content-center h-100">
+                    <span className="fs-5">{date.toString()}</span>
                     <span className="fs-5">{title}</span>
                     <span className="fs-5">{description}</span>
-                    <span className="fs-5">{date.toString()}</span>
                     <span className="fs-5">{startTime}</span>
                     <span className="fs-5">{endTime}</span>
                 </Stack>

@@ -1,11 +1,11 @@
 import { FormEvent, useEffect, useRef, useState } from "react"
-import { format, addMonths, subMonths, startOfMonth, 
-    endOfMonth, isSameMonth, isSameDay, startOfWeek, endOfWeek, addDays } from 'date-fns';
+import { format, addMonths, subMonths } from 'date-fns';
 import { Button, Col, Form, Modal, Row, Stack, ToggleButton, ToggleButtonGroup } from "react-bootstrap"
 import Select from 'react-select'
 import { TaskData } from "./App"
 import './styles.css'
 import { Link, useNavigate } from "react-router-dom";
+import { renderCalendar } from "./Calendar";
 
 type TaskFormProps = {
     onSubmit: (data: TaskData) => void
@@ -46,21 +46,6 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
     const [endTimeOptions, setEndTimeOptions] = useState<string[]>(['AM'])
     const navigate = useNavigate()
 
-    const months = {
-        0: 'January',
-        1: 'February',
-        2: 'March',
-        3: 'April',
-        4: 'May',
-        5: 'June',
-        6: 'July',
-        7: 'August',
-        8: 'September',
-        9: 'October',
-        10: 'November',
-        11: 'December',
-    }
-
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
     const handlePrevMonth = () => {
@@ -88,12 +73,17 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
     }
 
     const handleOptionChange = (val: string[]) => {
+        console.log('Selected Repeat Options:', val)
         setRepeatOptions(val)
     }
 
     const handleStartTimeOptionChange = (val: string[]) => setStartTimeOptions(val)
 
     const handleEndTimeOptionChange = (val: string[]) => setEndTimeOptions(val)
+
+    const handleDayClick = (date: Date) => {
+        setSelectedDate(date);
+      };
 
     // setting default time for time selection
     useEffect(() => {
@@ -120,20 +110,6 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
         setSelectedEndMinute(defaultEndMinute || null);
       }, []);
 
-    function handleSubmit(e: FormEvent) {
-        e.preventDefault()
-
-        onSubmit({
-            title: nameRef.current!.value,
-            description: descriptionRef.current!.value,
-            date: `${months[selectedDate.getMonth() as keyof typeof months]} ${selectedDate.getDate()}`,
-            startTime: `Start: ${selectedStartHour?.label}:${selectedStartMinute?.label} ${startTimeOptions}`,
-            endTime: `End: ${selectedEndHour?.label}:${selectedEndMinute?.label} ${endTimeOptions}`,
-            repeatOptions: `${repeatOptions}`,
-        })
-        navigate('..')
-    }
-
     function handleDateConfirm() {
         if (selectedDate) {
             setShowDateModal(false)
@@ -142,38 +118,18 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
         }
     }
 
-    const renderCalendar = () => {
-        const monthStart = startOfMonth(currentMonth)
-        const monthEnd = endOfMonth(monthStart)
-        const startDate = startOfWeek(monthStart)
-        const endDate = endOfWeek(monthEnd)
+    function handleSubmit(e: FormEvent) {
+        e.preventDefault()
 
-        const handleDayClick = (date: Date) => {
-            setSelectedDate(date)
-        }
-
-        const rows: JSX.Element[] = []
-        let week: JSX.Element[] = []
-        let day = startDate
-        
-        while (day <= endDate) {
-            for (let i = 0; i < 7; i++) {
-                const currentDay = day
-                week.push(
-                    <div key={currentDay.toString()}
-                    className={`day ${!isSameMonth(day, monthStart) ? 'disabled' : ''} 
-                    ${isSameDay(day, selectedDate) ? 'selected' : ''}`}
-                    onClick={() => handleDayClick(currentDay)} >
-                        {format(currentDay, 'd')}
-                    </div>
-                )
-                day = addDays(day, 1)
-            }
-            {rows.push(<Stack key={day.toString()} direction='horizontal' gap={4}>{week}</Stack>)}
-            {week = []}
-        }
-
-        return <div className='calendar'>{rows}</div>
+        onSubmit({
+            title: nameRef.current!.value,
+            description: descriptionRef.current!.value,
+            date: selectedDate,
+            startTime: `Start: ${selectedStartHour?.label}:${selectedStartMinute?.label} ${startTimeOptions}`,
+            endTime: `End: ${selectedEndHour?.label}:${selectedEndMinute?.label} ${endTimeOptions}`,
+            repeatOptions: `${repeatOptions}`,
+        })
+        navigate('..')
     }
 
     return(
@@ -203,12 +159,12 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
                             </Form.Group>
                         </Row>
                         <Row>
-                            <ToggleButtonGroup 
-                            type='radio'
-                            name='repeat-options'
-                            value={repeatOptions} 
-                            onChange={handleOptionChange} >
-                                <Stack gap={2}>
+                            <Stack gap={2}>
+                                <ToggleButtonGroup 
+                                type='radio'
+                                name='repeat-options'
+                                value={repeatOptions} 
+                                onChange={handleOptionChange} >
                                     <ToggleButton 
                                     className="repeat-options"
                                     variant='outline-primary'
@@ -219,7 +175,7 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
                                     <ToggleButton 
                                     className="repeat-options"
                                     variant='outline-primary' 
-                                    id='Every Dayt' 
+                                    id='Every Day' 
                                     value={['Every Day']}>
                                         Every Day
                                     </ToggleButton>
@@ -230,8 +186,14 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
                                     value={['Every Week']}>
                                         Every Week
                                     </ToggleButton>
+                                </ToggleButtonGroup>
                                 </Stack>
-                                <Stack gap={2}>
+                            <Stack gap={2}>
+                                <ToggleButtonGroup 
+                                    type='radio'
+                                    name='repeat-options'
+                                    value={repeatOptions} 
+                                    onChange={handleOptionChange} >
                                     <ToggleButton 
                                     className="repeat-options"
                                     variant='outline-primary' 
@@ -246,8 +208,8 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
                                     value={['Every Year']}>
                                         Every Year
                                     </ToggleButton>
+                                    </ToggleButtonGroup>
                                 </Stack>
-                            </ToggleButtonGroup>
                         </Row>
                     </Col>
                     <Form.Group controlId='time'>
@@ -354,13 +316,10 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
                   <div key={day} className="weekday">{day}</div>
                 ))}
               </Stack>
-              {renderCalendar()}
+              {renderCalendar({ currentMonth, selectedDate, handleDayClick })}
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant='secondary' onClick={() => setShowDateModal(false)}>
-              Cancel
-            </Button>
             <Button variant='primary' 
             onClick={() => handleDateConfirm()}>
               Confirm

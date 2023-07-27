@@ -8,6 +8,7 @@ import { TaskList } from "./TaskList";
 import { TaskLayout } from "./TaskLayout";
 import { Task } from "./Task";
 import { EditTask } from "./EditTask";
+import { addDays, addMonths } from "date-fns";
 
 export type Task = {
   id: string
@@ -16,7 +17,7 @@ export type Task = {
 export type TaskData = {
   title: string;
   description: string;
-  date: string;
+  date: Date;
   startTime: string;
   endTime: string;
   repeatOptions: string;
@@ -29,7 +30,7 @@ export type RawTask = {
 export type RawTaskData = {
   title: string
   description: string
-  date: string
+  date: Date
   startTime: string;
   endTime: string;
   repeatOptions: string;
@@ -39,11 +40,46 @@ function App() {
   const [tasks, setTasks] = useLocalStorage<RawTask[]>('tasks', [])
 
   function onCreateTask({...data}: TaskData) {
+    const newTask = { ...data, id: uuidV4() }
+
+    if (data.repeatOptions && data.repeatOptions !== 'No Repeat') {
+      const repeatedTasks = generateRepeatedTasks(newTask, data.repeatOptions)
+
+      setTasks((prevTasks => 
+        [...prevTasks, ...repeatedTasks]))
+    } else {
     setTasks(prevTasks => {
-      return [...prevTasks,
-      { ...data, id: uuidV4() }
-      ]
-    })
+      return [...prevTasks, newTask]})
+    }
+  }
+
+  function generateRepeatedTasks(data: TaskData, repeatOption: string): Task[] {
+    const tasks: Task[] = [];
+
+    if (repeatOption === 'No Repeat') {
+      tasks.push({ ...data, id: uuidV4() });
+    } else if (repeatOption === 'Every Day') {
+      for (let i = 0; i < 365; i++) {
+        const newDate = addDays(new Date(data.date), i)
+        tasks.push({ ...data, id: uuidV4(), date: newDate })
+      }
+    } else if (repeatOption === 'Every Week') {
+      for (let i = 0; i < 52; i++) {
+        const newDate = addDays(new Date(data.date), i * 7)
+        tasks.push({ ...data, id: uuidV4(), date: newDate })
+      }
+    } else if (repeatOption === 'Every Month') {
+      for (let i = 0; i < 12; i++) {
+        const newDate = addMonths(new Date(data.date), i)
+        tasks.push({ ...data, id: uuidV4(), date: newDate })
+      }
+    } else if (repeatOption === 'Every Year') {
+      for (let i = 0; i < 10; i++) {
+        const newDate = addMonths(new Date(data.date), i * 12)
+        tasks.push({ ...data, id: uuidV4(), date: newDate})
+      }
+    }
+    return tasks
   }
 
   function onDeleteTask(id: string) {

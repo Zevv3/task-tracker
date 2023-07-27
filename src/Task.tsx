@@ -1,6 +1,7 @@
 import { Button, Col, Row, Stack } from "react-bootstrap";
 import { useTask } from './TaskLayout'
 import { Link, useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 
 type TaskProps = {
     onDelete: (id: string) => void
@@ -24,7 +25,7 @@ export function Task({ onDelete }: TaskProps) {
         <Row className='align-items-center mb-4'>
             <Col>
                 <h1>{task.title}</h1>
-                <h3>{task.date}</h3>
+                <h3>{format(task.date, 'MMM do yyyy')}</h3>
                 <h5>Start: {task.startTime} End: {task.endTime}</h5>
             </Col>
             <Col xs='auto'>

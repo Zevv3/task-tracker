@@ -44,11 +44,17 @@ export function TaskList({ tasks }: TaskListProps) {
 
     const sortedTasks = useMemo(() => {
         return [...filteredTasks].sort((a, b) => {
-          const aDateTime = `${a.date} ${a.startTime}`;
-          const bDateTime = `${b.date} ${b.startTime}`;
-          return aDateTime.localeCompare(bDateTime);
+            const aPeriod = a.startTime.split(' ')[2];
+            const [aHour, aMinute] = a.startTime.split(' ')[1].split(':').map(Number);
+            const aTotalMinutes = aPeriod.toLowerCase() === 'pm' ? (aHour < 12 ? aHour + 12 : aHour) * 60 + aMinute + 720 : aHour * 60 + aMinute;
+        
+            const bPeriod = b.startTime.split(' ')[2];
+            const [bHour, bMinute] = b.startTime.split(' ')[1].split(':').map(Number);
+            const bTotalMinutes = bPeriod.toLowerCase() === 'pm' ? (bHour < 12 ? bHour + 12 : bHour) * 60 + bMinute + 720 : bHour * 60 + bMinute;
+        
+            return aTotalMinutes - bTotalMinutes;
         });
-      }, [filteredTasks]);
+    }, [filteredTasks]);
 
     function handleDateCancel() {
         setSelectedDate(null)
@@ -154,7 +160,7 @@ function TaskCard({ id, title, description, date, startTime, endTime }: Simplifi
                 <Stack gap={2} className="align-items-center justify-content-center h-100">
                     <span className="fs-5">{format(date, 'MMM do yyyy')}</span>
                     <span className="fs-5">{title}</span>
-                    <span className="fs-5">{description}</span>
+                    <span className={`fs-5 ${styles.desc}`}>{description}</span>
                     <span className="fs-5">{startTime}</span>
                     <span className="fs-5">{endTime}</span>
                 </Stack>

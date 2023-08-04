@@ -11,13 +11,30 @@ export function useLocalStorage<T>(key: string, initialValue: T | (() => T)) {
                 return initialValue
             }
         } else {
-            return JSON.parse(jsonValue)
-        }
-    })
+            try {
+              return JSON.parse(jsonValue, (key, value) => {
+                if (key === 'date') {
+                  return new Date(value);
+                }
+                return value;
+              });
+            } catch (error) {
+              console.error("Error parsing JSON:", error);
+              return initialValue;
+            }
+          }
+        });
+
 // update it when we find it
-    useEffect (() =>
-        localStorage.setItem(key, JSON.stringify(value))
-    ), [value, key]
+    useEffect(() => {
+        // Stringify the value and handle date serialization
+        localStorage.setItem(key, JSON.stringify(value, (_, value) => {
+        if (value instanceof Date) {
+            return value.toISOString(); // Convert Date to ISO string
+        }
+        return value;
+        }));
+    }, [value, key]);
 
     return [value, setValue] as [T, typeof setValue]
 }
